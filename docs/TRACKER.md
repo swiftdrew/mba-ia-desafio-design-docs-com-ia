@@ -1,7 +1,7 @@
 # TRACKER: Rastreabilidade de Requisitos e Decisões
 
-**Versão:** 1.0
-**Data:** 2025-11-01
+**Versão:** 1.1
+**Data:** 2026-07-16 (revisão conforme feedback de Marcos)
 **Propósito:** Mapear cada item dos documentos de design à origem na transcrição ou código.
 
 ---
@@ -10,9 +10,12 @@
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 |----|-----------|------|------------------|-------|------------|
-| PRD-OBJ-01 | docs/PRD.md | Objetivo | Latência P95 < 2 segundos (atual: polling 10-30s) | TRANSCRICAO | [09:02] Marcos |
-| PRD-OBJ-02 | docs/PRD.md | Objetivo | Taxa de sucesso entrega ≥ 98% | TRANSCRICAO | [09:14] Marcos (at-least-once) |
-| PRD-OBJ-03 | docs/PRD.md | Objetivo | Redução polling requests ≥ 80% | TRANSCRICAO | [09:00-02] Marcos (polling atual é pain) |
+| PRD-OBJ-01 | docs/PRD.md | Objetivo | Latência de entrega < 10 segundos | TRANSCRICAO | [09:02] Marcos |
+| PRD-OBJ-01-IMPL | docs/PRD.md | Derivação Técnica | Latência P95 < 2 segundos (via polling 2s) | TRANSCRICAO | [09:09-10] Diego, Larissa |
+| PRD-OBJ-02 | docs/PRD.md | Objetivo | At-least-once delivery com retry 5x | TRANSCRICAO | [09:24-26] Diego |
+| PRD-OBJ-02-HIPOTESE | docs/PRD.md | Hipótese a Calibrar | Taxa de sucesso entrega ≥ 98% | HIPOTESE | Não mencionado na reunião; SLO interno a validar com Marcos |
+| PRD-OBJ-03 | docs/PRD.md | Objetivo | Eliminar polling de clientes B2B | TRANSCRICAO | [09:00] Marcos |
+| PRD-OBJ-03-HIPOTESE | docs/PRD.md | Hipótese a Calibrar | Redução polling requests ≥ 80% | HIPOTESE | Não mencionado na reunião; métrica de adoção a validar com Marcos |
 | PRD-OBJ-04 | docs/PRD.md | Objetivo | Adoção 100% de 3 clientes principais | TRANSCRICAO | [09:00] Marcos (Atlas threat, Max, Nova) |
 | PRD-CONTEXT-01 | docs/PRD.md | Contexto | 3 clientes B2B: Atlas, MaxDistribuição, Nova Cargo | TRANSCRICAO | [09:00] Marcos |
 | PRD-CONTEXT-02 | docs/PRD.md | Contexto | Atlas ameaçou migrar pra concorrente | TRANSCRICAO | [09:00] Marcos |
@@ -153,6 +156,17 @@
 | Bruno (Senior Eng, Orders) | 17 | Integração OrderService, módulo, errors |
 | Sofia (Security) | 13 | HMAC, TLS, secret rotation, audit |
 | Marcos (PM) | 10 | Requisitos negócio, clientes, prazo |
+
+---
+
+## Hipóteses Identificadas que Requerem Validação
+
+Dois items foram identificados como hipóteses (não mencionados na reunião) e precisam ser validados com Marcos:
+
+| Hipótese | Status | Questão para Marcos | Impacto |
+|----------|--------|---------------------|--------|
+| PRD-OBJ-02-HIPOTESE: Taxa ≥ 98% | ⏳ PENDENTE | É expectativa cliente ou SLO interno? Se interno, qual número (95%? 99%? 99.5%)? | Critério de sucesso do projeto |
+| PRD-OBJ-03-HIPOTESE: Redução ≥ 80% | ⏳ PENDENTE | Esperan 80% (adoção parcial) ou 100% (adoção completa)? É métrica de sucesso mesmo ou só indicador? | Definição de meta de adoção |
 
 ---
 
