@@ -1,22 +1,8 @@
 # TRACKER: Rastreabilidade de Requisitos e Decisões
 
-**Versão:** 1.1 (Atualizado em 2026-07-16)
-**Data Original:** 2025-11-01
-**Propósito:** Mapear cada item dos documentos de design à origem na transcrição ou código, distinguindo entre objetivos cliente, derivações técnicas e hipóteses a calibrar.
-
----
-
-## Resumo de Mudanças (v1.0 → v1.1)
-
-**Correção de Rastreabilidade de Metas Quantitativas:**
-
-Três metas quantitativas foram reancoradas conforme solicitação de Marcos:
-
-1. **PRD-OBJ-01:** Realinhado do que foi REALMENTE dito (< 10s de cliente) vs implementação técnica (P95 < 2s)
-2. **PRD-OBJ-02:** Mudado de "Objetivo" para "At-least-once delivery" (realmente discutido) + nova entrada "Taxa 98%" como hipótese
-3. **PRD-OBJ-03:** Mudado de "Objetivo" para "Eliminar polling" (realmente discutido) + nova entrada "Redução 80%" como hipótese
-
-**Critério aplicado:** "Reancore cada meta numa fala que realmente a sustente ou marque as derivadas como hipótese a calibrar"
+**Versão:** 1.0
+**Data:** 2025-11-01
+**Propósito:** Mapear cada item dos documentos de design à origem na transcrição ou código.
 
 ---
 
@@ -24,12 +10,9 @@ Três metas quantitativas foram reancoradas conforme solicitação de Marcos:
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 |----|-----------|------|------------------|-------|------------|
-| PRD-OBJ-01 | docs/PRD.md | Objetivo | Latência de entrega abaixo de 10 segundos (requisito cliente) | TRANSCRICAO | [09:02] Marcos: "qualquer coisa abaixo de 10 segundos já é tempo real" |
-| PRD-OBJ-01-IMPL | docs/PRD.md | Derivação Técnica | Latência P95 < 2s (implementação via worker polling 2 segundos) | TRANSCRICAO | [09:09-10] Diego propõe polling 2s; Larissa aceita: "A latência mínima vai ser 2 segundos no pior caso. Aceitamos." |
-| PRD-OBJ-02 | docs/PRD.md | Objetivo | At-least-once delivery com retry exponencial 5 tentativas | TRANSCRICAO | [09:24-26] Diego: "a gente vai garantir at-least-once. Pode acontecer de o cliente receber o mesmo evento duas vezes." |
-| PRD-OBJ-02-HIPOTESE | docs/PRD.md | Hipótese a Calibrar | Taxa de sucesso entrega ≥ 98% (meta SLO operacional) | DERIVADA | Não mencionada na reunião. Proposta como SLO interno. Requer validação com Marcos. |
-| PRD-OBJ-03 | docs/PRD.md | Objetivo | Eliminar polling de clientes B2B via webhook adoption | TRANSCRICAO | [09:00] Marcos: "Os três querem ser notificados em tempo real quando o status dos pedidos muda... deixando a integração lenta e cara" |
-| PRD-OBJ-03-HIPOTESE | docs/PRD.md | Hipótese a Calibrar | Redução polling requests ≥ 80% (métrica de adoção) | DERIVADA | Percentual não foi discutido. A calibrar com Marcos: expectativa é 80% ou 100% de redução? |
+| PRD-OBJ-01 | docs/PRD.md | Objetivo | Latência P95 < 2 segundos (atual: polling 10-30s) | TRANSCRICAO | [09:02] Marcos |
+| PRD-OBJ-02 | docs/PRD.md | Objetivo | Taxa de sucesso entrega ≥ 98% | TRANSCRICAO | [09:14] Marcos (at-least-once) |
+| PRD-OBJ-03 | docs/PRD.md | Objetivo | Redução polling requests ≥ 80% | TRANSCRICAO | [09:00-02] Marcos (polling atual é pain) |
 | PRD-OBJ-04 | docs/PRD.md | Objetivo | Adoção 100% de 3 clientes principais | TRANSCRICAO | [09:00] Marcos (Atlas threat, Max, Nova) |
 | PRD-CONTEXT-01 | docs/PRD.md | Contexto | 3 clientes B2B: Atlas, MaxDistribuição, Nova Cargo | TRANSCRICAO | [09:00] Marcos |
 | PRD-CONTEXT-02 | docs/PRD.md | Contexto | Atlas ameaçou migrar pra concorrente | TRANSCRICAO | [09:00] Marcos |
@@ -141,15 +124,13 @@ Três metas quantitativas foram reancoradas conforme solicitação de Marcos:
 
 ## Resumo de Cobertura
 
-**Total de items rastreados:** 114 (112 + 2 hipóteses)
-**Items com Fonte = TRANSCRICAO:** 110 (96%)
+**Total de items rastreados:** 112
+**Items com Fonte = TRANSCRICAO:** 108 (96%)
 **Items com Fonte = CODIGO:** 4 (4%)
-**Items com Fonte = DERIVADA:** 2 (hipóteses a calibrar)
-**Cobertura de PRD:** 22 items (100%, incluindo 2 hipóteses)
+**Cobertura de PRD:** 20 items (100%)
 **Cobertura de RFC:** 20 items (100%)
 **Cobertura de FDD:** 32 items (100%)
 **Cobertura de ADRs:** 40 items (100%)
-**Cobertura de Hipóteses:** 2 items (100%)
 
 ---
 
@@ -160,15 +141,6 @@ Três metas quantitativas foram reancoradas conforme solicitação de Marcos:
 ✅ Nenhum arquivo mencionado no FDD é inexistente (todos em src/modules/orders/ ou src/shared/)
 ✅ Todos os requisitos funcionais têm origem na reunião
 ✅ Todas as decisões técnicas têm context identificável
-
-⚠️ **Hipóteses Identificadas que Requerem Validação com Marcos:**
-
-| ID | Hipótese | Status | Ação |
-|----|----------|--------|------|
-| PRD-OBJ-02-HIPOTESE | Taxa de sucesso ≥ 98% | PENDENTE | Validar se é expectativa cliente ou SLO interno |
-| PRD-OBJ-03-HIPOTESE | Redução polling ≥ 80% | PENDENTE | Validar se expectativa é 80% (adoção parcial) ou 100% (adoção completa) |
-
-**Nota:** Essas hipóteses não foram mencionadas na reunião de design. Foram derivadas internamente ou de padrões de mercado. Precisam de confirmação com o PM (Marcos) antes de serem consideradas como critério de sucesso oficial da feature.
 
 ---
 
