@@ -116,15 +116,31 @@ Após 24h, secret antigo morre automaticamente.
 
 ### Métricas de Sucesso
 
-| Métrica | Meta | Como Medir |
-|---------|------|-----------|
-| **Latência P95 de entrega** | < 2 segundos | Timestamp(webhook enviado) - Timestamp(status mudou) |
-| **Taxa de sucesso de entrega** | ≥ 98% | eventos_delivered / (eventos_delivered + eventos_failed) |
-| **Redução de polling requests** | ≥ 80% | GET /orders requests pré vs pós (contar por IP de cliente) |
-| **Adoção de clientes** | 100% dos 3 principais | Atlas, Max, Nova Cargo todos usando webhooks até fim de nov |
-| **Tempo médio pra regressão** | < 30 minutos | Se webhook falhar por timeout/offline, tempo até conseguir novamente |
-| **Confiabilidade do worker** | ≥ 99.5% | Uptime do processo worker (sem crashes) |
-| **Satisfação do cliente** | ≥ 4/5 | Feedback de Larissa, Marcos com clientes |
+| Métrica | Meta | Rastreamento | Observação |
+|---------|------|--------------|-----------|
+| **Latência de entrega < 10 segundos** | Abaixo de 10s | ✅ [09:02] Marcos | Requisito cliente real |
+| **Latência P95 de entrega** | < 2 segundos | ℹ️ [09:09-10] Diego/Larissa | Implementação técnica via polling 2s |
+| **At-least-once delivery** | Retry 5x com backoff | ✅ [09:24-26] Diego | Requisito cliente real |
+| **Taxa de sucesso de entrega** | ≥ 98% | ❓ HIPÓTESE | Não mencionado na reunião; SLO interno a calibrar com Marcos |
+| **Eliminar polling de clientes** | Webhook adoption | ✅ [09:00] Marcos | Requisito cliente real |
+| **Redução de polling requests** | ≥ 80% | ❓ HIPÓTESE | Não mencionado; métrica de adoção a calibrar com Marcos (80% ou 100%?) |
+| **Adoção de clientes** | 100% dos 3 principais | ✅ [09:00] Marcos | Atlas, Max, Nova Cargo usando webhooks |
+| **Tempo médio pra regressão** | < 30 minutos | ℹ️ Derivado | Se webhook falhar, tempo até conseguir novamente |
+| **Confiabilidade do worker** | ≥ 99.5% | ✅ [09:11] Larissa | Uptime do processo separado |
+| **Satisfação do cliente** | ≥ 4/5 | ✅ [09:00-45] Marcos | Feedback com Atlas, Max, Nova |
+
+### Notas sobre Rastreabilidade de Métricas
+
+**Legenda:**
+- ✅ **Requisito Cliente Real**: Mencionado explicitamente na reunião de design
+- ℹ️ **Derivação Técnica**: Decisão da equipe para atingir requisito cliente
+- ❓ **Hipótese a Calibrar**: Não foi mencionado na reunião; requer validação com Marcos
+
+**Métricas que Requerem Validação com Marcos:**
+1. **Taxa de sucesso ≥ 98%** — É expectativa cliente ou SLO interno? Se interno, qual número (95%? 99%? 99.5%)?
+2. **Redução polling ≥ 80%** — Vocês esperam 80% (adoção parcial) ou 100% (adoção completa)?
+
+Vide `docs/TRACKER.md` (seção "Hipóteses Identificadas") para rastreamento completo.
 
 ### Critérios de Sucesso Técnicos
 
@@ -349,14 +365,16 @@ Múltiplos workers processando em paralelo. → Implementar quando atingir satur
 ## 7. Requisitos Não Funcionais
 
 ### RNF-001: Performance
-- **Latência P95 entrega:** < 2 segundos
-- **Latência P99 entrega:** < 10 segundos
+- **Latência de entrega < 10 segundos** ✅ (requisito cliente [09:02] Marcos)
+- **Latência P95 entrega:** < 2 segundos ℹ️ (implementação via polling 2s)
+- **Latência P99 entrega:** < 10 segundos ✅ (alinhado com requisito cliente)
 - **Throughput:** ≥ 100 eventos/minuto (no início)
 - **CPU worker:** < 5% (em idle)
 
 ### RNF-002: Disponibilidade
-- **Uptime do worker:** ≥ 99.5%
-- **Taxa de sucesso de entrega:** ≥ 98%
+- **Uptime do worker:** ≥ 99.5% ✅ [09:11] Larissa
+- **At-least-once delivery:** Garantido com retry 5x ✅ [09:24-26] Diego
+- **Taxa de sucesso de entrega:** ≥ 98% ❓ HIPÓTESE (não mencionado; a calibrar)
 - **RTO (Recovery Time Objective):** < 5 minutos (se worker cai)
 
 ### RNF-003: Segurança
@@ -387,23 +405,27 @@ Múltiplos workers processando em paralelo. → Implementar quando atingir satur
 
 ### D-1: Outbox Pattern vs Síncrono
 **Decisão:** Usar padrão Outbox no MySQL.
-**Trade-off:** +Atomicidade, +Resiliência vs -Latência mínima 2s, -Necessário worker separado
+**Requisito Cliente:** Latência < 10 segundos [09:02] Marcos
+**Trade-off:** +Atomicidade, +Resiliência vs -Latência mínima 2s (implementação), -Necessário worker separado
 **Rastreabilidade:** [09:04-07] Bruno, Diego
 
 ### D-2: Retry com Backoff vs Indefinido
 **Decisão:** 5 tentativas com backoff (1m/5m/30m/2h/12h), depois DLQ.
+**Requisito Cliente:** At-least-once delivery [09:24-26] Diego
 **Trade-off:** +Clareza operacional, +Finito vs -Cliente offline > 15h não recovera
 **Rastreabilidade:** [09:14-17] Diego, Bruno
 
 ### D-3: HMAC-SHA256 vs OAuth
 **Decisão:** HMAC-SHA256 com secret único por endpoint.
+**Requisito Cliente:** Segurança de autenticação [09:20-21] Sofia
 **Trade-off:** +Simples pra cliente, +Padrão de mercado vs -Responsabilidade no cliente
 **Rastreabilidade:** [09:19-21] Sofia
 
 ### D-4: Single-worker vs Redis Streams
 **Decisão:** Single worker em polling 2s, sem Redis.
+**Requisito Cliente:** Latência < 10 segundos com implementação simples
 **Trade-off:** +Sem infra extra, +Simples vs -Não escalável automaticamente, -Single point of failure
-**Rastreabilidade:** [09:06-13] Diego
+**Rastreabilidade:** [09:06-13] Diego, Larissa (nota: P95 < 2s é implementação via polling 2s, não requisito cliente)
 
 ---
 
@@ -541,11 +563,25 @@ Múltiplos workers processando em paralelo. → Implementar quando atingir satur
 
 ## Aprovação
 
-- [x] **Marcos** (Product Manager)
-- [x] **Larissa** (Tech Lead)
-- [x] **Bruno** (Senior Engineer, Orders)
-- [x] **Diego** (Senior Engineer, Platform)
-- [x] **Sofia** (Security Engineer)
+- [x] **Marcos** (Product Manager) — inicial, v1.0
+- [x] **Larissa** (Tech Lead) — inicial, v1.0
+- [x] **Bruno** (Senior Engineer, Orders) — inicial, v1.0
+- [x] **Diego** (Senior Engineer, Platform) — inicial, v1.0
+- [x] **Sofia** (Security Engineer) — inicial, v1.0
 
-**Data de Aprovação:** 2025-11-01
+**Data de Aprovação v1.0:** 2025-11-01
+
+### Status v1.1 (Atualizado 2026-07-16)
+
+Conforme feedback de Marcos, o PRD foi reformulado para:
+- ✅ Reancorar metas em falas reais da transcrição
+- ✅ Separar requisitos cliente de derivações técnicas
+- ✅ Marcar hipóteses não mencionadas como "a calibrar"
+
+**Pendente de Aprovação:**
+- ⏳ **Marcos** — Validação das 2 hipóteses:
+  1. Taxa de sucesso ≥ 98% (é OK? qual SLO?)
+  2. Redução polling ≥ 80% (é 80% ou 100%?)
+
+Vide `PARA_MARCOS_VALIDACAO.md` para questões detalhadas.
 
