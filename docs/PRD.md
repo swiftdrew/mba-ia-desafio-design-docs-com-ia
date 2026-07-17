@@ -1,7 +1,7 @@
 # PRD: Sistema de Webhooks de Notificação de Pedidos
 
 **Versão:** 1.1
-**Data:** 2026-07-16 (revisão conforme feedback de Marcos)
+**Data:** 2026-07-16
 **Product Manager:** Marcos
 **Tech Lead:** Larissa
 

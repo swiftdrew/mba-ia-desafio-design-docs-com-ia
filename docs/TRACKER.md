@@ -1,7 +1,7 @@
 # TRACKER: Rastreabilidade de Requisitos e Decisões
 
 **Versão:** 1.1
-**Data:** 2026-07-16 (revisão conforme feedback de Marcos)
+**Data:** 2026-07-16
 **Propósito:** Mapear cada item dos documentos de design à origem na transcrição ou código.
 
 ---
