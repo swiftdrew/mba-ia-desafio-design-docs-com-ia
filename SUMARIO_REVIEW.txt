@@ -1,0 +1,190 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                   REVIEW: METAS QUANTITATIVAS DO PRD                          ║
+║              Validação contra Transcrição da Reunião Técnica                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+DATA: 2026-07-16
+REVISOR: Claude Code
+OBJETIVO: Verificar se metas estão sustentadas em fatos (transcrição) ou são
+         derivações/hipóteses que devem ser marcadas como tal no Tracker.
+
+═════════════════════════════════════════════════════════════════════════════════
+
+RESULTADO GERAL: ⚠️  3 de 4 metas têm inconsistências
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         1️⃣  LATÊNCIA P95 < 2 SEGUNDOS                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ REGISTRADA NO TRACKER (PRD-OBJ-01):                                        │
+│ "Latência P95 < 2 segundos"                                                │
+│ Fonte: [09:02] Marcos                                                      │
+│                                                                             │
+│ O QUE A TRANSCRIÇÃO REALMENTE DIZ:                                         │
+│ [09:02] Marcos: "Pra eles, qualquer coisa abaixo de 10 segundos já é       │
+│ 'tempo real'."                                                             │
+│                                                                             │
+│ ANÁLISE:                                                                    │
+│ ✅ Marcos citou: "abaixo de 10 segundos"                                   │
+│ ❌ Nenhuma menção a "2 segundos" como requisito cliente                    │
+│                                                                             │
+│ ORIGEM DO "2 SEGUNDOS":                                                     │
+│ [09:09] Diego: "A cada 2 segundos, busca os eventos..."  (polling)        │
+│ [09:10] Larissa: "A latência mínima vai ser 2 segundos no pior caso"      │
+│                                                                             │
+│ ⚠️  STATUS: DERIVADA TÉCNICA                                               │
+│                                                                             │
+│ RECOMENDAÇÃO:                                                               │
+│ • Tracker: PRD-OBJ-01 = "Latência < 10 segundos" (requisito cliente)      │
+│ • Nova entrada: "Latência P95 < 2s" = implementação via worker polling    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    2️⃣  TAXA DE SUCESSO ≥ 98%                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ REGISTRADA NO TRACKER (PRD-OBJ-02):                                        │
+│ "Taxa de sucesso entrega ≥ 98%"                                            │
+│ Fonte: [09:14] Marcos (at-least-once)                                      │
+│                                                                             │
+│ O QUE A TRANSCRIÇÃO REALMENTE DIZ:                                         │
+│ [09:24-26] Diego: "A gente vai garantir at-least-once... Diego menciona     │
+│ 'resolve 99% dos casos'" (sobre dedup, não SLO)                            │
+│                                                                             │
+│ ANÁLISE:                                                                    │
+│ ✅ Discutido: "at-least-once delivery" com retry 5x                       │
+│ ❌ NUNCA mencionado: "98% de taxa de sucesso"                              │
+│ ❌ Ninguém propôs ou discutiu meta percentual de entrega                   │
+│                                                                             │
+│ ⚠️  STATUS: HIPÓTESE NÃO MENCIONADA                                        │
+│                                                                             │
+│ RECOMENDAÇÃO:                                                               │
+│ • Tracker: PRD-OBJ-02 = "At-least-once delivery (retry 5x)" (cliente)     │
+│ • Nova entrada: "Taxa sucesso ≥ 98%" = hipótese a calibrar               │
+│ • Questão para Marcos: É expectativa cliente ou SLO interno?              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  3️⃣  REDUÇÃO DE POLLING ≥ 80%                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ REGISTRADA NO TRACKER (PRD-OBJ-03):                                        │
+│ "Redução polling requests ≥ 80%"                                           │
+│ Fonte: [09:00-02] Marcos (polling atual é pain)                            │
+│                                                                             │
+│ O QUE A TRANSCRIÇÃO REALMENTE DIZ:                                         │
+│ [09:00] Marcos: "Hoje eles ficam batendo no GET /orders... isso tá deixando│
+│ a integração lenta e cara"                                                 │
+│ [09:02] Marcos: "Três querem ser notificados em tempo real"                │
+│                                                                             │
+│ ANÁLISE:                                                                    │
+│ ✅ Objetivo claro: ELIMINAR polling                                       │
+│ ❌ Nenhuma cifra de percentual mencionada                                  │
+│ ❌ Nenhuma discussão sobre "80%"                                           │
+│                                                                             │
+│ AMBIGUIDADE:                                                                │
+│ • Esperado: Adoção 100% (todos migrarem)?                                 │
+│ • Ou conservador: 80% (alguns em híbrido)?                                │
+│                                                                             │
+│ 🟡 STATUS: AMBÍGUA - Hipótese não validada                                │
+│                                                                             │
+│ RECOMENDAÇÃO:                                                               │
+│ • Tracker: PRD-OBJ-03 = "Eliminar polling via webhook adoption" (cliente) │
+│ • Nova entrada: "Redução ≥ 80%" = hipótese a calibrar                    │
+│ • Questão para Marcos: Expectativa é 80% ou 100%?                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  4️⃣  LATÊNCIA P99 < 10 SEGUNDOS                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ REGISTRADA NO PRD (RNF-001):                                               │
+│ "Latência P99 entrega < 10 segundos"                                       │
+│                                                                             │
+│ O QUE A TRANSCRIÇÃO DIZ:                                                   │
+│ [09:02] Marcos: "Pra eles, qualquer coisa abaixo de 10 segundos já é       │
+│ 'tempo real'"                                                              │
+│                                                                             │
+│ ANÁLISE:                                                                    │
+│ ✅ EXPLICITAMENTE mencionado pelo cliente (Marcos)                        │
+│ ✅ Claramente rastreado na transcrição                                     │
+│ ✅ Sem conflito ou ambiguidade                                             │
+│                                                                             │
+│ ✅ STATUS: OK - Corretamente fundamentado                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════════
+
+TABELA RESUMIDA:
+
+┌──────────┬─────────────────────┬──────────────────┬─────────────────────────┐
+│ Métrica  │ Mencionada na Reunião│ Status na Reunião│ Recomendação            │
+├──────────┼─────────────────────┼──────────────────┼─────────────────────────┤
+│ < 10s    │ ✅ [09:02] Marcos   │ Requisito cliente│ ✅ Manter (correto)     │
+│ P95 < 2s │ ❌ Não              │ Derivada técnica │ ⚠️  Separar em entrada  │
+│ Taxa 98% │ ❌ Não              │ Hipótese         │ ⚠️  Validar com Marcos  │
+│ Red. 80% │ ❌ Não              │ Ambígua          │ ⚠️  Validar com Marcos  │
+└──────────┴─────────────────────┴──────────────────┴─────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════════
+
+IMPACTO:
+
+Para a DISTINÇÃO entre "objetivo cliente" (transcrição) e "meta de implementação"
+(derivada), o Tracker deve documentar:
+
+• Origem clara (onde vem a informação)
+• Tipo (Objetivo vs Derivação vs Hipótese)
+• Justificativa (por que essa meta e não outra)
+
+ISSO PERMITE:
+
+1. Avaliar sucesso vs requisitos REAIS do cliente
+2. Entender trade-offs técnicos (por quê 2s se cliente aceitava 10s?)
+3. Rastrear hipóteses internas que precisam validação
+4. Evitar "mission creep" (metas que ninguém pediu)
+
+═════════════════════════════════════════════════════════════════════════════════
+
+PRÓXIMAS AÇÕES:
+
+1. ✏️  Atualizar TRACKER.md com entradas de derivação e hipótese
+2. 💬 Enviar 3 questões para Marcos (taxa 98%? adoção 80% ou 100%? latência P95/P99?)
+3. 🔄 Atualizar PRD.md seção 4 com notas de rastreabilidade
+4. ✅ Re-validar integridade do Tracker
+5. 📌 Marcar como "Validado" quando Marcos responder
+
+═════════════════════════════════════════════════════════════════════════════════
+
+DOCUMENTOS GERADOS:
+
+📄 REVIEW_METAS_QUANTITATIVAS.md
+   → Análise detalhada com citações completas da transcrição
+
+📄 RECOMENDACOES_AJUSTE_TRACKER.md
+   → Entradas exatas para adicionar/atualizar no Tracker
+   → Questões para validação com Marcos
+   → Checklist de implementação
+
+📄 SUMARIO_REVIEW.txt
+   → Este arquivo (visão geral executiva)
+
+═════════════════════════════════════════════════════════════════════════════════
+
+CONCLUSÃO:
+
+O projeto tem documentação excelente. O Tracker estava quase completo. Mas faltou
+fazer a **distinção fundamental** entre:
+
+• O que o CLIENTE pediu (transcrição)
+• O que a TEAM decidiu TECNICAMENTE (derivações)
+• O que é HIPÓTESE a validar (metas não mencionadas)
+
+Essa distinção é a RAZÃO DE EXISTIR do Tracker. Quando aplicada, torna a
+rastreabilidade de requisitos 100% clara e defensável.
+
+═════════════════════════════════════════════════════════════════════════════════
