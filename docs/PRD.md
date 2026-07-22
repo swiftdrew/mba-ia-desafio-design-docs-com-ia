@@ -366,16 +366,16 @@ Múltiplos workers processando em paralelo. → Implementar quando atingir satur
 
 ### RNF-001: Performance
 - **Latência de entrega < 10 segundos** ✅ (requisito cliente [09:02] Marcos)
-- **Latência P95 entrega:** < 2 segundos ℹ️ (implementação via polling 2s)
-- **Latência P99 entrega:** < 10 segundos ✅ (alinhado com requisito cliente)
-- **Throughput:** ≥ 100 eventos/minuto (no início)
-- **CPU worker:** < 5% (em idle)
+- **Latência P95 entrega:** < 2 segundos ℹ️ DERIVAÇÃO TÉCNICA (implementação via polling 2s [09:09-10] Diego, Larissa)
+- **Latência P99 entrega:** < 10 segundos ℹ️ DERIVAÇÃO TÉCNICA (alinhado com requisito cliente via polling)
+- **Throughput:** ≥ 100 eventos/minuto ❓ HIPÓTESE (não mencionado; a calibrar durante implementação)
+- **CPU worker:** < 5% (em idle) ❓ HIPÓTESE (não mencionado; observar em produção)
 
 ### RNF-002: Disponibilidade
-- **Uptime do worker:** ≥ 99.5% ✅ [09:11] Larissa
+- **Uptime do worker:** ≥ 99.5% ❓ HIPÓTESE (não mencionado na reunião; SLO interno a calibrar)
 - **At-least-once delivery:** Garantido com retry 5x ✅ [09:24-26] Diego
-- **Taxa de sucesso de entrega:** ≥ 98% ❓ HIPÓTESE (não mencionado; a calibrar)
-- **RTO (Recovery Time Objective):** < 5 minutos (se worker cai)
+- **Taxa de sucesso de entrega:** ≥ 98% ❓ HIPÓTESE (não mencionado; a calibrar com Marcos)
+- **RTO (Recovery Time Objective):** < 5 minutos (se worker cai) ℹ️ DERIVAÇÃO TÉCNICA (inferido de "worker separado" [09:11] Diego)
 
 ### RNF-003: Segurança
 - **HTTPS obrigatório** pra webhook URLs
@@ -385,19 +385,19 @@ Múltiplos workers processando em paralelo. → Implementar quando atingir satur
 - **Nenhum secret em log** (redação)
 
 ### RNF-004: Escalabilidade
-- Suportar 100 clientes simultaneamente
-- Suportar 100+ eventos/minuto
-- Tabela outbox sem degradação até 1M de registros
+- Suportar 100 clientes simultaneamente ❓ HIPÓTESE (não mencionado; estimativa de capacidade)
+- Suportar 100+ eventos/minuto ❓ HIPÓTESE (não mencionado; estimativa de throughput)
+- Tabela outbox sem degradação até 1M de registros ℹ️ DERIVAÇÃO TÉCNICA (inferido de índices em status+created_at [09:08] Diego)
 
 ### RNF-005: Observabilidade
-- Logs estruturados (Pino)
-- Métricas Prometheus
-- Tracing distribuído (OpenTelemetry, opcional)
+- Logs estruturados (Pino) ✅ (padrão projeto [09:29] Bruno, já existe)
+- Métricas Prometheus ❓ HIPÓTESE (não mencionado; observabilidade técnica a implementar)
+- Tracing distribuído (OpenTelemetry, opcional) ❓ HIPÓTESE (não mencionado; nice-to-have futuro)
 
 ### RNF-006: Auditoria
-- Todas ações de admin logadas (quem, quando, o quê)
-- Histórico de rotação de secret
-- DLQ como evidence de falhas
+- Todas ações de admin logadas (quem, quando, o quê) ✅ [09:36] Sofia (requisito auditoria)
+- Histórico de rotação de secret ℹ️ DERIVAÇÃO TÉCNICA (inferido de "secret rotação" [09:21-34] Sofia)
+- DLQ como evidence de falhas ✅ [09:18] Diego (DLQ para debug e reprocessamento)
 
 ---
 
@@ -571,17 +571,19 @@ Múltiplos workers processando em paralelo. → Implementar quando atingir satur
 
 **Data de Aprovação v1.0:** 2025-11-01
 
-### Status v1.1 (Atualizado 2026-07-16)
+### Status v1.2 (Atualizado 2026-07-22)
 
-Conforme feedback de Marcos, o PRD foi reformulado para:
-- ✅ Reancorar metas em falas reais da transcrição
-- ✅ Separar requisitos cliente de derivações técnicas
-- ✅ Marcar hipóteses não mencionadas como "a calibrar"
+Conforme feedback sobre rastreabilidade, foram realizadas as seguintes correções:
+- ✅ Revisão completa de RNF-001 a RNF-006 para separar dados reais da reunião vs derivações técnicas vs hipóteses
+- ✅ Reclassificação com símbolos: ✅ (requisito cliente/reunião), ℹ️ (derivação técnica), ❓ (hipótese)
+- ✅ Cada item agora aponta exatamente à fala/timestamp correto na TRANSCRICAO.md
 
-**Pendente de Aprovação:**
-- ⏳ **Marcos** — Validação das 2 hipóteses:
-  1. Taxa de sucesso ≥ 98% (é OK? qual SLO?)
-  2. Redução polling ≥ 80% (é 80% ou 100%?)
+**Hipóteses Identificadas que Requerem Validação com Marcos:**
+1. Taxa de sucesso ≥ 98% — SLO ou apenas indicador?
+2. Redução polling ≥ 80% — É 80% (adoção parcial) ou 100%?
+3. Uptime ≥ 99.5% — SLO interno ou target? Se SLO, qual número?
+4. Throughput ≥ 100 eventos/min — Target realista?
+5. Suportar 100+ clientes — Número baseado em quê?
 
-Vide `PARA_MARCOS_VALIDACAO.md` para questões detalhadas.
+Vide seção "Métricas de Sucesso" (item 4) para rastreamento detalhado de cada métrica.
 

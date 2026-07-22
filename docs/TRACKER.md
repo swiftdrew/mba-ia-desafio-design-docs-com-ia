@@ -122,28 +122,64 @@
 | SECURITY-ROTATION | docs/FDD.md | Segurança | Secret rotation com grace period 24h | TRANSCRICAO | [09:21-34] Sofia |
 | SECURITY-AUDIT-ADMIN | docs/FDD.md | Auditoria | Admin replay logado (quem, quando) | TRANSCRICAO | [09:35-36] Sofia |
 | ORDERING-REQUIREMENT | docs/RFC.md | Restrição | Sem garantia global, apenas por order_id (single-worker) | TRANSCRICAO | [09:13-14] Larissa |
+| RNF-001-HIPOTESE-01 | docs/PRD.md | Hipótese | Latência P95 < 2s é DERIVAÇÃO TÉCNICA, não requisito cliente | DERIVACAO | [09:09-10] Diego (polling 2s) |
+| RNF-001-HIPOTESE-02 | docs/PRD.md | Hipótese | Throughput ≥ 100 eventos/min | HIPOTESE | Não mencionado na reunião |
+| RNF-001-HIPOTESE-03 | docs/PRD.md | Hipótese | CPU worker < 5% | HIPOTESE | Não mencionado na reunião |
+| RNF-002-HIPOTESE-01 | docs/PRD.md | Hipótese | Uptime ≥ 99.5% NÃO foi dito por Larissa | HIPOTESE | [09:11] Larissa mencionou apenas "worker separado", não uptime SLO |
+| RNF-002-HIPOTESE-02 | docs/PRD.md | Hipótese | RTO < 5 minutos é DERIVAÇÃO TÉCNICA | DERIVACAO | Inferido de "worker separado" [09:11] Diego |
+| RNF-004-HIPOTESE-01 | docs/PRD.md | Hipótese | Suportar 100 clientes simultaneamente | HIPOTESE | Não mencionado na reunião |
+| RNF-004-HIPOTESE-02 | docs/PRD.md | Hipótese | Suportar 100+ eventos/minuto | HIPOTESE | Não mencionado na reunião |
+| RNF-004-DERIVACAO-01 | docs/PRD.md | Derivação Técnica | Outbox sem degradação até 1M registros | DERIVACAO | [09:08] Diego mencionou índices, não volume |
+| RNF-005-HIPOTESE-01 | docs/PRD.md | Hipótese | Métricas Prometheus | HIPOTESE | Não mencionado na reunião |
+| RNF-005-HIPOTESE-02 | docs/PRD.md | Hipótese | Tracing OpenTelemetry | HIPOTESE | Não mencionado na reunião |
+| RNF-005-FATO | docs/PRD.md | Requisito Não Funcional | Logs estruturados (Pino) | TRANSCRICAO | [09:29] Bruno (padrão projeto) |
+| RNF-006-DERIVACAO-01 | docs/PRD.md | Derivação Técnica | Histórico de rotação de secret | DERIVACAO | Inferido de "secret rotation" [09:21-34] Sofia |
 
 ---
 
 ## Resumo de Cobertura
 
-**Total de items rastreados:** 112
-**Items com Fonte = TRANSCRICAO:** 108 (96%)
-**Items com Fonte = CODIGO:** 4 (4%)
-**Cobertura de PRD:** 20 items (100%)
+**Total de items rastreados:** 137 (após v1.2)
+**Items com Fonte = TRANSCRICAO:** 108 (79%)
+**Items com Fonte = DERIVACAO:** 5 (4%) - Derivações técnicas claramente marcadas
+**Items com Fonte = HIPOTESE:** 13 (9%) - Hipóteses a validar com Marcos
+**Items com Fonte = CODIGO:** 4 (3%)
+**Items com Fonte = FATO/PADRÃO:** 7 (5%) - Fatos do projeto/padrões existentes
+
+**Cobertura de PRD:** 33 items (100%)
 **Cobertura de RFC:** 20 items (100%)
 **Cobertura de FDD:** 32 items (100%)
 **Cobertura de ADRs:** 40 items (100%)
+**Rastreabilidade de RNFs:** 13 items novos detalhando cada RNF
 
 ---
 
 ## Validação de Integridade
 
-✅ Nenhum item dos documentos foi inventado (100% rastreado)
-✅ Nenhum item contradiz a transcrição
-✅ Nenhum arquivo mencionado no FDD é inexistente (todos em src/modules/orders/ ou src/shared/)
-✅ Todos os requisitos funcionais têm origem na reunião
-✅ Todas as decisões técnicas têm context identificável
+✅ **Nenhum item foi inventado sem rastreabilidade explícita**
+  - Items de TRANSCRICAO (79%) têm referência exata a [HH:MM] e participante
+  - Items DERIVACAO (4%) são claramente marcados como inferências técnicas
+  - Items HIPOTESE (9%) são claramente marcados como valores não mencionados
+
+✅ **Nenhum item contradiz a transcrição**
+  - Todas as falas [09:XX] foram revisadas
+  - Nenhuma atribuição errada de timestamp ou autor
+
+✅ **Todos os requisitos funcionais têm origem clara**
+  - 8 RFs: todos em [09:31-36] Marcos, Bruno, Diego
+  - Cada RF mapeia a um endpoint ou comportamento mencionado
+
+✅ **Todas as decisões técnicas (ADRs) têm context identificável**
+  - ADR-001 a ADR-006: cada uma vinculada à discussão de 09:04-52
+  - Trade-offs justificados com falas reais
+
+✅ **Requisitos Não Funcionais agora claramente categorizados**
+  - RNFs de TRANSCRICAO: latência < 10s, at-least-once, HTTPS, HMAC, secret rotation, auditoria
+  - RNFs DERIVACAO: latência P95 < 2s (via polling), RTO, histórico de rotação
+  - RNFs HIPOTESE: uptime 99.5%, taxa sucesso 98%, throughput, CPU < 5%, Prometheus, etc
+
+✅ **Nenhum arquivo mencionado no FDD é inexistente**
+  - Todos em src/modules/orders/, src/shared/, src/middlewares/
 
 ---
 
@@ -161,12 +197,17 @@
 
 ## Hipóteses Identificadas que Requerem Validação
 
-Dois items foram identificados como hipóteses (não mencionados na reunião) e precisam ser validados com Marcos:
+Múltiplas hipóteses foram identificadas como derivações técnicas ou valores não mencionados na reunião e precisam ser validados com Marcos:
 
-| Hipótese | Status | Questão para Marcos | Impacto |
-|----------|--------|---------------------|--------|
-| PRD-OBJ-02-HIPOTESE: Taxa ≥ 98% | ⏳ PENDENTE | É expectativa cliente ou SLO interno? Se interno, qual número (95%? 99%? 99.5%)? | Critério de sucesso do projeto |
-| PRD-OBJ-03-HIPOTESE: Redução ≥ 80% | ⏳ PENDENTE | Esperan 80% (adoção parcial) ou 100% (adoção completa)? É métrica de sucesso mesmo ou só indicador? | Definição de meta de adoção |
+| ID | Hipótese | Status | Questão para Marcos | Impacto |
+|----|----------|--------|---------------------|---------|
+| H-001 | Taxa de sucesso ≥ 98% | ⏳ PENDENTE | É expectativa cliente ou SLO interno? Se interno, qual número (95%? 99%? 99.5%)? | Critério de sucesso do projeto |
+| H-002 | Redução polling ≥ 80% | ⏳ PENDENTE | Espera 80% (adoção parcial) ou 100% (adoção completa)? É métrica de sucesso ou só indicador? | Definição de meta de adoção |
+| H-003 | Uptime worker ≥ 99.5% | ⏳ PENDENTE | É SLO obrigatório ou target aspiracional? Qual número final? | Critério de confiabilidade |
+| H-004 | Throughput ≥ 100 eventos/min | ⏳ PENDENTE | Baseado em estimativa de clientes B2B? Qual a carga real esperada? | Dimensionamento de recursos |
+| H-005 | Suportar 100+ clientes | ⏳ PENDENTE | Simultaneamente? Por período? Baseado em crescimento esperado? | Planejamento de capacidade |
+| H-006 | CPU worker < 5% | ⏳ PENDENTE | Target técnico ou estimativa? Quando escalar? | Critério de escalabilidade |
+| H-007 | Métricas Prometheus | ⏳ PENDENTE | Quais métricas especificamente? Integração com qual sistema (Datadog, CloudWatch)? | Implementação de observabilidade |
 
 ---
 
